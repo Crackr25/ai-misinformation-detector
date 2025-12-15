@@ -13,13 +13,16 @@ export function Settings({ onApiKeyChange }: SettingsProps) {
     const [saved, setSaved] = useState(false);
 
     useEffect(() => {
-        const settings = StorageService.getSettings();
-        setApiKey(settings.apiKey);
-        setModel(settings.model || DEFAULT_MODEL);
+        const loadSettings = async () => {
+            const settings = await StorageService.getSettings();
+            setApiKey(settings.apiKey);
+            setModel(settings.model || DEFAULT_MODEL);
+        };
+        loadSettings();
     }, []);
 
-    const handleSave = () => {
-        StorageService.saveSettings({ apiKey, model });
+    const handleSave = async () => {
+        await StorageService.saveSettings({ apiKey, model });
         onApiKeyChange(apiKey);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);

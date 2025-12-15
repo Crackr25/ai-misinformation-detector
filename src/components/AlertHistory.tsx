@@ -10,7 +10,11 @@ export function AlertHistory() {
     const [selectedResult, setSelectedResult] = useState<AnalysisResult | null>(null);
 
     useEffect(() => {
-        setHistory(StorageService.getHistory());
+        const loadHistory = async () => {
+            const data = await StorageService.getHistory();
+            setHistory(data);
+        };
+        loadHistory();
     }, []);
 
     const filteredHistory = history.filter(item => {

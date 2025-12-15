@@ -34,8 +34,11 @@ function DashboardLayout() {
   const { logout, user } = useAuth();
 
   useEffect(() => {
-    const settings = StorageService.getSettings();
-    setApiKey(settings.apiKey);
+    const loadSettings = async () => {
+      const settings = await StorageService.getSettings();
+      setApiKey(settings.apiKey);
+    };
+    loadSettings();
   }, []);
 
   const renderContent = () => {

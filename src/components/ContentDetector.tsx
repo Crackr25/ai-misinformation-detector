@@ -75,10 +75,10 @@ export function ContentDetector({ apiKey }: ContentDetectorProps) {
         setResult(null);
 
         try {
-            const settings = StorageService.getSettings();
+            const settings = await StorageService.getSettings();
             const analysisResult = await OpenRouterService.analyzeContent(text, image, apiKey, settings.model);
             setResult(analysisResult);
-            StorageService.addResult(analysisResult);
+            await StorageService.saveResult(analysisResult);
         } catch (err: any) {
             setError(err.message || "Analysis failed. Please try again.");
         } finally {

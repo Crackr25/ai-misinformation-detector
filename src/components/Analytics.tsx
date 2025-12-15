@@ -7,7 +7,11 @@ export function Analytics() {
     const [history, setHistory] = useState<AnalysisResult[]>([]);
 
     useEffect(() => {
-        setHistory(StorageService.getHistory());
+        const loadHistory = async () => {
+            const data = await StorageService.getHistory();
+            setHistory(data);
+        };
+        loadHistory();
     }, []);
 
     // Process data for Risk Distribution
