@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Shield, LayoutDashboard, History, BarChart3, Settings as SettingsIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Shield, LayoutDashboard, History, BarChart3, Settings as SettingsIcon, LogOut } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { ContentDetector } from './components/ContentDetector';
 import { AlertHistory } from './components/AlertHistory';
@@ -7,12 +8,30 @@ import { Analytics } from './components/Analytics';
 import { Settings } from './components/Settings';
 import { StorageService } from './services/StorageService';
 import { cn } from './lib/utils';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import { useAuth } from './context/AuthContext';
 
 type Tab = 'dashboard' | 'detector' | 'history' | 'analytics' | 'settings';
 
-function App() {
+function ProtectedRoute({ children }: { children: React.ReactElement }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen text-white bg-gray-900">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+function DashboardLayout() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [apiKey, setApiKey] = useState('');
+  const { logout, user } = useAuth();
 
   useEffect(() => {
     const settings = StorageService.getSettings();
@@ -37,19 +56,19 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className="min-h-screen font-sans bg-slate-50 text-slate-900">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-white border-b border-slate-200">
+        <div className="flex items-center justify-between h-16 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="p-2 bg-blue-600 rounded-lg">
               <Shield className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
               AI Misinformation Detector
             </h1>
           </div>
-          <div className="text-sm text-slate-500">
+          <div className="flex items-center gap-4 text-sm text-slate-500">
             {apiKey ? (
               <span className="flex items-center gap-1 text-green-600">
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -61,15 +80,25 @@ function App() {
                 API Key Required
               </span>
             )}
+            <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
+              <span className="font-medium text-slate-700">{user?.username}</span>
+              <button
+                onClick={logout}
+                className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+      <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-8 md:flex-row">
           {/* Sidebar Navigation */}
-          <nav className="w-full md:w-64 flex-shrink-0 space-y-1">
+          <nav className="flex-shrink-0 w-full space-y-1 md:w-64">
             <NavButton
               active={activeTab === 'dashboard'}
               onClick={() => setActiveTab('dashboard')}
@@ -128,6 +157,23 @@ function NavButton({ active, onClick, icon, label }: { active: boolean; onClick:
       {icon}
       {label}
     </button>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 
