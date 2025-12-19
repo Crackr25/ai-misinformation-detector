@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -27,7 +27,7 @@ const Login = () => {
             }
 
             login(data.token, data.user);
-            navigate('/');
+            navigate('/admin');
         } catch (err: any) {
             setError(err.message);
         }
@@ -66,9 +66,7 @@ const Login = () => {
                         Login
                     </button>
                 </form>
-                <p className="text-center text-sm text-gray-400">
-                    Don't have an account? <Link to="/register" className="text-blue-400 hover:underline">Register</Link>
-                </p>
+
             </div>
         </div>
     );

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Shield, LayoutDashboard, History, BarChart3, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { Shield, LayoutDashboard, History, BarChart3, Settings as SettingsIcon, LogOut, Users } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { ContentDetector } from './components/ContentDetector';
 import { AlertHistory } from './components/AlertHistory';
 import { Analytics } from './components/Analytics';
 import { Settings } from './components/Settings';
+import { AdminUsers } from './pages/AdminUsers';
 import { StorageService } from './services/StorageService';
 import { cn } from './lib/utils';
 import Login from './pages/Login';
-import Register from './pages/Register';
+import PublicHome from './pages/PublicHome';
+
 import { useAuth } from './context/AuthContext';
 
-type Tab = 'dashboard' | 'detector' | 'history' | 'analytics' | 'settings';
+type Tab = 'dashboard' | 'detector' | 'history' | 'analytics' | 'settings' | 'users';
 
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,6 +55,8 @@ function DashboardLayout() {
         return <Analytics />;
       case 'settings':
         return <Settings onApiKeyChange={setApiKey} />;
+      case 'users':
+        return <AdminUsers />;
       default:
         return <Dashboard setActiveTab={setActiveTab} />;
     }
@@ -133,6 +137,12 @@ function DashboardLayout() {
                 icon={<SettingsIcon className="w-5 h-5" />}
                 label="Settings"
               />
+              <NavButton
+                active={activeTab === 'users'}
+                onClick={() => setActiveTab('users')}
+                icon={<Users className="w-5 h-5" />}
+                label="Users"
+              />
             </div>
           </nav>
 
@@ -166,16 +176,19 @@ function NavButton({ active, onClick, icon, label }: { active: boolean; onClick:
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<PublicHome />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+
       <Route
-        path="/*"
+        path="/admin/*"
         element={
           <ProtectedRoute>
             <DashboardLayout />
           </ProtectedRoute>
         }
       />
+      {/* Redirect unknown routes to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
