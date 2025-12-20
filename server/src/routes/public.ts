@@ -10,8 +10,9 @@ router.post('/analyze', async (req: Request, res: Response) => {
     const db = await getDb();
 
     try {
-        // 1. Get API Key from Admin Settings (Assuming user_id 1 is admin)
-        const settings = await db.get('SELECT api_key, model FROM settings WHERE user_id = 1');
+        // 1. Get API Key from any configured user (Fallback strategy)
+        // We look for the first user who has set up an API key.
+        const settings = await db.get('SELECT api_key, model FROM settings WHERE api_key IS NOT NULL AND api_key != "" LIMIT 1');
 
         if (!settings || !settings.api_key) {
             res.status(503).json({ error: 'Service not configured. Admin must set API Key.' });

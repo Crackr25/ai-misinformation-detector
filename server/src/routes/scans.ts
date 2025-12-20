@@ -12,7 +12,7 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
     const db = await getDb();
 
     try {
-        const rows = await db.all('SELECT * FROM scans WHERE user_id = ? ORDER BY timestamp DESC', [userId]);
+        const rows = await db.all('SELECT * FROM scans ORDER BY timestamp DESC');
         // Map back to frontend model (camelCase)
         const history = rows.map(row => ({
             id: row.id,
